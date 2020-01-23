@@ -1,0 +1,2 @@
+this line came from the CLI
+. Here is an addition using the >> operator
