@@ -1,0 +1,8 @@
+library(jsonlite)
+library(tidyverse)
+
+
+list_json1 <- fromJSON(text.json) 
+print(df_json1)
+glimpse(df_json1)
+list_json1 <- map_if(list_json1, is.data.frame, list) 
