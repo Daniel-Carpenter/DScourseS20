@@ -39,7 +39,12 @@ AAPL  <- ds.getSymbol.yahoo('AAPL', from = startDate, to = Sys.Date())
 SnP   <- ds.getSymbol.yahoo('^GSPC', from = startDate, to = Sys.Date())
 GOOG   <- ds.getSymbol.yahoo('GOOG', from = startDate, to = Sys.Date())
   
-  
+AAPL
+
+ggplot(data = AAPL, aes(x = AAPL.High, y = AAPL.Low, 
+                       size = as.factor(APPL.High))) +
+  geom_point() +
+  theme_minimal()
   
   
   
