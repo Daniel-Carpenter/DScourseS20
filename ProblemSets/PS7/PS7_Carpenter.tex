@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{PS7_Carpenter}
+\author{Daniel Carpenter }
+\date{March 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Update}
+    Currently, my decision stands to replicate a known stock portfolio optimization \\
+    model that is dynamic to any chosen stock. I will likely need to create this \\
+    model in julia with the JuMP file. The calculations are extensive in matrix \\
+    algebra and linear optimization. Overall, I know that this idea is possible, \\
+    but I will likely need to come see you for ideas on how to manipulate some \\
+    of the tables to allow for the optimization. I have created this model in \\
+    excel, but it is a bear to update and keep up with. If I can create the \\
+    framework, then updating this will allow the user to easily update their \\
+    portfolio on a day-to-day basis. This project will not only create value \\
+    for me, but could also be of extreme use for other users. This model is \\
+    one that many individuals on Wall Street use. The end result would be to \\
+    create a method that accepts stock inputs, then computing the optimal \\
+    allocation of each stock for your portfolio. The final optimization \\
+    calculations rely on constrained optimizations that JuMP easily handles. \\
+    If their is something similar to the JuMP function in R, I may use that \\
+    because I have already set up some of the framework. I will plan to swing \\
+    by your office soon.
+
+\newpage
+\section{PS7 Answers}
+% Table created by stargazer v.5.2.2 by Marek Hlavac, Harvard University. E-mail: hlavac at fas.harvard.edu
+% Date and time: Mon, Mar 09, 2020 - 3:58:41 PM
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{Pctl(25)} & \multicolumn{1}{c}{Pctl(75)} & \multicolumn{1}{c}{Max} \\ 
+\hline \\[-1.8ex] 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table}
+
+I am unsure why the table did not include any information
+
+
+
+\begin{table}[!htbp] \centering 
+  \caption{Regression Results from Finding Missing Values} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-3} D{.}{.}{-3} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-3} 
+\\[-1.8ex] & \multicolumn{2}{c}{logwage} \\ 
+\\[-1.8ex] & \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)}\\ 
+\hline \\[-1.8ex] 
+ hgc & 0.062^{***} & 0.050^{***} \\ 
+  & (0.005) & (0.004) \\ 
+  & & \\ 
+ collegenot college grad & 0.145^{***} & 0.168^{***} \\ 
+  & (0.034) & (0.026) \\ 
+  & & \\ 
+ tenure & 0.050^{***} & 0.038^{***} \\ 
+  & (0.005) & (0.004) \\ 
+  & & \\ 
+ I(tenure$\hat{\mkern6mu}$2) & -0.002^{***} & -0.001^{***} \\ 
+  & (0.0003) & (0.0002) \\ 
+  & & \\ 
+ age & 0.0004 & 0.0002 \\ 
+  & (0.003) & (0.002) \\ 
+  & & \\ 
+ marriedsingle & -0.022 & -0.027^{**} \\ 
+  & (0.018) & (0.014) \\ 
+  & & \\ 
+ Constant & 0.534^{***} & 0.708^{***} \\ 
+  & (0.146) & (0.116) \\ 
+  & & \\ 
+\hline \\[-1.8ex] 
+Observations & \multicolumn{1}{c}{1,669} & \multicolumn{1}{c}{2,229} \\ 
+R$^{2}$ & \multicolumn{1}{c}{0.208} & \multicolumn{1}{c}{0.147} \\ 
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.206} & \multicolumn{1}{c}{0.145} \\ 
+Residual Std. Error & \multicolumn{1}{c}{0.344 (df = 1662)} & \multicolumn{1}{c}{0.308 (df = 2222)} \\ 
+F Statistic & \multicolumn{1}{c}{72.917$^{***}$ (df = 6; 1662)} & \multicolumn{1}{c}{63.973$^{***}$ (df = 6; 2222)} \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
+
+The intercept seemed to change the most among estimations.
+
+\end{document}
