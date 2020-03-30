@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{PS9}
+\author{Daniel Carpenter }
+\date{March 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Answers to Questions 6 - 8}
+    \subsection{Dimensions of housing.train}
+       \begin{center}
+        404 x 450
+        \end{center}
+    
+    \subsection{}
+            \begin{table}[!htbp] \centering 
+              \caption{Comparison of Machine Learning Models} 
+              \label{} 
+            \begin{tabular}{@{\extracolsep{5pt}} cccc} 
+            \\[-1.8ex]\hline 
+            \hline \\[-1.8ex] 
+             & LASSO & Ridge Reg. & Net Elastic \\ 
+            \hline \\[-1.8ex] 
+            Lambda & $0.006$ & $0.095$ & $0.014$ \\ 
+            In-Sample RMSE & $0.155$ & $0.150$ & $0.165$ \\ 
+            Out-of-Sample RMSE & $0.155$ & $0.152$ & $0.171$ \\ 
+            \hline \\[-1.8ex] 
+            \end{tabular} 
+            \end{table} 
+    
+    \subsection{}
+        Since Alpha is around 0.5, it suggests that either model has similar certainty of results. If the model were closer to zero, we would use Ridge Regression.
+    
+    \subsection{}
+        The Net Elastic model seem balanced, so the bias-variance trade off should not be an issue. The two models yield relatively similar RSME's.
+        \\ \\
+        A linear regression would not be an effective way to estimate this model. Since we have more variables that rows, the model would suffer from multi-colinearity.
+
+\end{document}
