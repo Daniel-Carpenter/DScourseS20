@@ -1,3 +1,4 @@
+# LIBRARY  --------------------------------------------------------------------------------------------------------
 library(tidyverse)
 library(rtsdata)
 library(skimr)
@@ -7,14 +8,18 @@ library(dplyr)
 library(knitr)      # Used to concatenate words
 library(lubridate)  # Used to clean up dates
 library(Stack)      # Used to "Stack", or append data frames
+library(rvest)      # Used to web scrape stock list
 
 # INPUTS  ---------------------------------------------------------------------------------------------------------
-  startDate <- "1999-01-01"
-  endDate   <- Sys.Date() 
+  startDate           <- "1999-01-01"
+  endDate             <- Sys.Date() 
+  stockList.Url       <- "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies#References"
+  stockList.Node      <- "#constituents"
+  stockList.colNumber <- 1
+  
   stockList <- c('AMZN', 'AAPL', 'MSFT')
 
-# METHOD LIST (FUNCTIONS)  ----------------------------------------------------------------------------------------
-
+# FUNCTION LIST ---------------------------------------------------------------------------------------------------
   manipulateStockData <- function(listNum, startDate, stockList, df)  
   {
     ## Manipualte Dataset ---------------------------------------------------------------------------------------------
@@ -54,20 +59,34 @@ library(Stack)      # Used to "Stack", or append data frames
     df <- as.data.frame(ds.getSymbol.yahoo(stockList[listNum], from = startDate, to = endDate))
     return(df)
   }
-  pullData            <- function(listNum, startDate, endDate, stockList) # combines 'manipulateStockData' and 'yahooFinance' functions
+  pullData            <- function(startDate, endDate, stockList) # calls 'manipulateStockData' and 'yahooFinance' functions and appends data
   {
-    df <- manipulateStockData(listNum, startDate,stockList, yahooFinance(listNum, startDate, endDate, stockList))
-    return(df)
-  }
-
-# PULL IN DATA ----------------------------------------------------------------------------------------------------
-  ## Assign Variables from 'stockList'
+    df <- list()
     
     for(i in 1:length(stockList))
     {
-          assign(paste("st", i, sep = ""), pullData(i, startDate, endDate, stockList))
+      temp <- manipulateStockData(i, startDate,stockList, yahooFinance(i, startDate, endDate, stockList))
+      df <- rbind(df,temp) # this appends all stocks together (by row)
     }
+    return(df)
     
-    df <- rbind(st1, st2, st3) ## THIS IS WHERE YOU HAVE TO INPUT VALUES - NEED AUTOMATED FIX
+    #Note:
+    ## 1. pivot_wider() <- pivots table, also has ability to rename variables on output 
+    ## 2. change rbind to cbind if you want to stack by column
+  }
+  webData             <- function(url, node, colNumber)
+  {
+    webTable <- read_html(url) %>%
+      html_node(node) %>%
+      html_table()
+    
+    webTable <- as.array(webTable[,colNumber]) # change to array becasuse needs to reference elements
 
-      
+    return(webTable)
+  }
+
+# MAIN METHOD -----------------------------------------------------------------------------------------------------
+  newList <- webData(stockList.Url,stockList.Node,stockList.colNumber)
+  df <- pullData(startDate, endDate, stockList)
+
+  

@@ -18,7 +18,7 @@
   stockList.Node      <- "#constituents"
   stockList.colNumber <- 1
   
-  stockList <- c('MSFT', 'AAPL', 'AMZN', 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM')
+  stockList <- c('MSFT', 'AAPL', 'AMZN') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
 
 # FUNCTION LIST -------------------------------------------------------------------------------------------------
   manipulateStockData <- function(listNum, startDate, stockList)  # potentially consolidate into 'pullData'
@@ -63,6 +63,7 @@
   }
 
 # MAIN-----------------------------------------------------------------------------------------------------------
-  df <- pullData(startDate, endDate, stockList)
-
+  df <- pullData(startDate, endDate, stockList) %>%
+    mutate(return = MSFT / lag(MSFT) - 1)
+  
   
