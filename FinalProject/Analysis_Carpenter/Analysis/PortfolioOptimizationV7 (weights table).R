@@ -88,11 +88,16 @@
     VarCovMatrix <- (t(df.matrix) %*% df.matrix) / length(df) # Creates Variance Covariance Matrix
     
   # Create Weights Table
+    wtTable <- c()
+    setWeight <- 1 / length(stockList)
+    
     for (i in 1:length(stockList))
     {
-      wtTable <- array()
-      wtTable[i] <- 1 / length(stockList)
+      wtTable[i] <- setWeight ### Set at equal weights for initialization
     }
+    wtTable <- as.data.frame(wtTable)
+    colnames(wtTable) <- c("portfolioWeight")
+    rownames(wtTable) <- stockList
     
   # Calculate Risk of Porfolio
     
