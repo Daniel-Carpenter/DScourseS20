@@ -15,7 +15,7 @@
 # INPUTS  -------------------------------------------------------------------------------------------------------
   startDate           <- "1990-01-01"
   endDate             <- Sys.Date()
-  stockList <- c('MSFT', 'AAPL', 'AMZN') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
+  stockList <- c('GOOG', 'GOLD', 'AMZN') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
   
   ##Used for Stock Webscape
     #stockList.Url       <- "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies#References"
@@ -88,7 +88,7 @@
     VarCovMatrix  <- (t(df.matrix) %*% df.matrix) / length(df) # Creates Variance Covariance Matrix
     
   # Create Weights Table
-    stockWeights           <- c()
+    stockWeights      <- c()
     setInitialWeight  <- 1 / length(stockList)
     
     for (i in 1:length(stockList))
@@ -98,13 +98,15 @@
     stockWeights            <- as.data.frame(stockWeights)
     colnames(stockWeights)  <- c("portfolioWeight")
     rownames(stockWeights)  <- stockList
+    
     sumOfWeights            <- sum(stockWeights$portfolioWeight) ### Must equal 1.00
     stockWeights            <- as.matrix(stockWeights)
     
   # Calculate Risk of Porfolio
-    risk <- sqrt((stockWeights %*% VarCovMatrix) %*% t(stockWeights)) ## STOPPED HERE <- FIX ERROR WITH MATRIX TYPES
+    risk <- sum(sqrt((t(stockWeights) %*% VarCovMatrix) %*% stockWeights))
     
   # Calculate Expected Return of Portfolio
+    
     
   # Calculate Sharpe Ratio for Portfolio
     
