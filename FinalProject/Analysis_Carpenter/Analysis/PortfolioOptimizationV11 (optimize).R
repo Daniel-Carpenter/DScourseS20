@@ -10,7 +10,7 @@
   library(Stack)      # Used to "Stack", or append data frames
   library(rvest)      # Used to web scrape stock list
   library(tidyr)      # Used to pivot data frame
-
+  library(Rglpk)      # Used to optimize portfolio weights
 
 # INPUTS  -------------------------------------------------------------------------------------------------------
     startDate           <- "1990-01-01"
@@ -137,7 +137,7 @@
                         select(-monthNum, -year))
   
       VarCovMatrix  <- (t(df.matrix) %*% df.matrix) / length(df) # Creates Variance Covariance Matrix
-    
+  
   # Create Weights Table
       stockWeights      <- c()
       setInitialWeight  <- 1 / length(stockList)
@@ -154,12 +154,24 @@
       stockWeights            <- t(as.matrix(stockWeights))
     
   # Calculate Risk of Porfolio
-      risk            <- sum(sqrt((stockWeights %*% VarCovMatrix) %*% t(stockWeights))) # S\tandard Deviation (or volatility) of the portfolio, i.e. risk
+      risk            <- sqrt((stockWeights %*% VarCovMatrix) %*% t(stockWeights)) # Standard Deviation (or volatility) of the portfolio, i.e. risk
     
   # Calculate Expected Return of Portfolio
       expectedReturn  <- sum(stockWeights %*% df.return)    # expected return (summation of weights x return)
     
   # Calculate Sharpe Ratio for Portfolio
       sharpeRatio     <- (expectedReturn - riskFreeRate) / risk   # objective function <- goal is to maximize return per unit risk taken
-    
-  
+      
+  # Optimize Risk, Given desired Expected Return
+      objectiveFun      <- risk
+      
+      constraintInputs  <- c(t(sumOfWeights))
+      direction         <- c("==")
+      constraintValues  <- c(1)
+      
+      optimalWeights    <- Rglpk_solve_LP(objectiveFun,
+                                          constraintInputs,
+                                          direction,
+                                          constraintValues,
+                                          max = FALSE)
+      
