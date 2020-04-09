@@ -54,6 +54,34 @@
       
       return(riskFreeRate)
     }
+    avgReturnTable      <- function(startDate, endDate, stockList) # calls 'manipulateStockData', creates table with average monthly return per stock
+    {
+      # Append Each Stock by Row -------------------------------------------------------------------------------------
+      df <- list()
+      
+      for(i in 1:length(stockList))
+      {
+        temp  <- manipulateStockData(i, startDate,stockList)
+        df    <- rbind(df,temp) # this appends all stocks together (by row)
+      }
+      
+      # Calculate Excess Return and Remove Calculation Columns -------------------------------------------------------
+      df <- df %>%  mutate(return = stockPrice / lag(stockPrice) - 1) %>%
+        select(-stockPrice) %>%
+        drop_na(return) %>% 
+        group_by(stockName) %>%
+        summarise(avgMonthlyReturn = mean(return)) # Creates table with average return per stock
+      
+      # Pivot Data   -------------------------------------------------------------------------------------------------
+      df <- as.data.frame(pivot_wider(df, names_from = stockName, values_from = avgMonthlyReturn) %>%
+                            drop_na) ## drops rows for when firms were not publically traded
+      rownames(df)  <- c("avgMonthlyReturn")
+      
+      df <- t(data.matrix(df))
+      
+      
+      return(df)
+    }
     pullData            <- function(startDate, endDate, stockList) # calls 'manipulateStockData', Pulls in T-Bill data, appends, then pivots data
     {
       # Pull in T-Bill Data as Proxy for Risk Free Rate -------------------------------------------------------------
@@ -79,32 +107,6 @@
         df <- pivot_wider(df, names_from = stockName, values_from = excessReturn) %>%
               drop_na() ## drops rows for when firms were not publically traded
   
-      return(df)
-    }
-    avgReturnTable      <- function(startDate, endDate, stockList) # calls 'manipulateStockData', creates table with average monthly return per stock
-    {
-      # Append Each Stock by Row -------------------------------------------------------------------------------------
-      df <- list()
-      
-      for(i in 1:length(stockList))
-      {
-        temp  <- manipulateStockData(i, startDate,stockList)
-        df    <- rbind(df,temp) # this appends all stocks together (by row)
-      }
-      
-      # Calculate Excess Return and Remove Calculation Columns -------------------------------------------------------
-      df <- df %>%  mutate(return = stockPrice / lag(stockPrice) - 1) %>%
-                    select(-stockPrice) %>%
-                    drop_na(return) %>% 
-                    group_by(stockName) %>%
-                    summarise(avgMonthlyReturn = mean(return)) # Creates table with average return per stock
-      
-      # Pivot Data   -------------------------------------------------------------------------------------------------
-      df <- pivot_wider(df, names_from = stockName, values_from = avgMonthlyReturn) %>%
-        drop_na() ## drops rows for when firms were not publically traded
-      
-      df <- data.matrix(df)
-      
       return(df)
     }
     pullWebList         <- function(url, node, colNumber) # Currently unused
@@ -143,13 +145,13 @@
       rownames(stockWeights)  <- stockList
       
       sumOfWeights            <- sum(stockWeights$portfolioWeight) # Must equal 1.00, or 100%
-      stockWeights            <- as.matrix(stockWeights)
+      stockWeights            <- t(as.matrix(stockWeights))
     
   # Calculate Risk of Porfolio
-      risk            <- sum(sqrt((t(stockWeights) %*% VarCovMatrix) %*% stockWeights)) # S\tandard Deviation (or volatility) of the portfolio, i.e. risk
+      risk            <- sum(sqrt((stockWeights %*% VarCovMatrix) %*% t(stockWeights))) # S\tandard Deviation (or volatility) of the portfolio, i.e. risk
     
   # Calculate Expected Return of Portfolio
-      expectedReturn  <- sum(t(stockWeights) %*% t(df.return))    # expected return (summation of weights x return)
+      expectedReturn  <- sum(stockWeights %*% df.return)    # expected return (summation of weights x return)
     
   # Calculate Sharpe Ratio for Portfolio
       sharpeRatio     <- (expectedReturn - riskFreeRate) / risk   # objective function <- goal is to maximize return per unit risk taken
