@@ -15,8 +15,8 @@
 # INPUTS  -------------------------------------------------------------------------------------------------------
     startDate           <- "2015-01-01"
     endDate             <- "2020-04-01"
-    stockList           <- c('JNJ', 'PG', 'JPM', 'FB', 'JNJ', 'GOOG') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
-    desiredReturn       <- 0.0084
+    stockList           <- c('JNJ', 'PG', 'JPM') #,'FB', 'GOOG', 'AMZN', 'MSFT', 'AAPL', 'STF', 'OIL', 'GOLD'
+    desiredReturn       <- .02
     dollarsInvested     <- 10000
     
     ##Used for Stock Webscape
@@ -33,15 +33,15 @@
         replacedWord <- combine_words(c(stockList[listNum], 'Adjusted'), and = ".") # replacedWord = AMZN.Adjusted
         df <- df %>% rename(stockPrice = replacedWord) %>% # note that stockPrice = to the Adjusted Close Price 
           add_column(stockName = stockList[listNum], .before = "stockPrice") %>% 
-          select(stockName,stockPrice) %>%
-          drop_na()
+          select(stockName,stockPrice)
         
         df <- cbind(date = as.Date(rownames(df)),df)
         df <- cbind(monthNum = month(as.Date(rownames(df))),df)
         df <- cbind(year = year(as.Date(rownames(df))),df)
         df <- as.data.frame(df %>% 
                 group_by(year, monthNum, stockName) %>%
-                summarise(stockPrice = mean(stockPrice)))  
+                summarise(stockPrice = mean(stockPrice)) %>%
+                  drop_na())
   
         return(df);
     }
@@ -52,9 +52,9 @@
       df <- cbind(monthNum = month(as.Date(rownames(df))),df)
       df <- cbind(year = year(as.Date(rownames(df))),df)
       df <- as.data.frame(df %>% 
-                            group_by(year, monthNum) %>%
-                            summarise(stockPrice = mean(IRX.Adjusted))) %>%
-                            mutate(return = stockPrice / lag(stockPrice) - 1) %>%
+                            group_by(year, monthNum, IRX.Adjusted) %>%
+                            summarise(stockPrice = sum(IRX.Adjusted))) %>%
+                            mutate(return = IRX.Adjusted / lag(IRX.Adjusted) - 1) %>%
                             select(return) %>%
                             drop_na(return)
       
@@ -127,7 +127,7 @@
       webTable <- as.array(webTable[,colNumber]) # change to array becasuse needs to reference elements
   
       return(webTable)
-  }
+    }
 
 # MAIN-----------------------------------------------------------------------------------------------------------
   df            <- pullData(startDate, endDate, stockList)
@@ -156,10 +156,10 @@
       stockWeights1 <- stockWeights
       
   # Optimize Risk, Given desired Expected Return
-      #objectiveFun      <- sqrt(diag(VarCovMatrix)) 
-      tempVarCovMatVector <- sqrt(stockWeights1 %*% VarCovMatrix)
+      objectiveFun      <- sqrt(diag(VarCovMatrix)) 
+      #tempVarCovMatVector <- sqrt(stockWeights1 %*% VarCovMatrix)
       
-      objectiveFun      <- tempVarCovMatVector
+      #objectiveFun      <- tempVarCovMatVector
       constraintInputs  <- rbind(stockWeights, as.vector(df.return))
       direction         <- c("==", "==")
       constraintValues  <- c(1, desiredReturn)
@@ -169,11 +169,7 @@
                                           direction,
                                           constraintValues,
                                           max = FALSE)
-      objectiveFun
-      df.return
-      
-      
-      
+
       portfolioOptimal <- cbind(as.data.frame(optimalWeights$solution),
                                 as.data.frame(optimalWeights$solution) * dollarsInvested)
         colnames(portfolioOptimal)  <- c("Stock Weight", "Dollar Investment")

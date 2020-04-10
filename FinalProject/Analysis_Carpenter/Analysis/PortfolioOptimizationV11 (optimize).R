@@ -15,7 +15,7 @@
 # INPUTS  -------------------------------------------------------------------------------------------------------
     startDate           <- "2015-01-01"
     endDate             <- "2020-04-01"
-    stockList           <- c('JNJ', 'PG', 'JPM') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
+    stockList           <- c('PG', 'JPM','FB', 'JNJ', 'GOOG', 'AMZN', 'MSFT', 'AAPL', 'STF', 'OIL', 'GOLD') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
     desiredReturn       <- .02
     dollarsInvested     <- 10000
     

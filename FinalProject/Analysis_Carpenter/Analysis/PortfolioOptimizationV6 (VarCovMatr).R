@@ -15,7 +15,7 @@
 # INPUTS  -------------------------------------------------------------------------------------------------------
   startDate           <- "1990-01-01"
   endDate             <- Sys.Date()
-  stockList <- c('MSFT', 'AAPL', 'AMZN') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
+  stockList <- c('MSFT', 'AAPL', 'AMZN','FB', 'JNJ', 'GOOG', 'PG', 'JPM') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
   
   ##Used for Stock Webscape
     stockList.Url       <- "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies#References"
