@@ -3,41 +3,45 @@ library(tidyverse)
 library(lubridate)
 library(dplyr)
 
-#df.SP500 <- GetSP500Stocks()
-#stockNames    <- df.SP500$Tickers
+# INPUTS  -------------------------------------------------------------------------------------------------------
+  startDate    <- Sys.Date() - 365 * 5
+  endDate     <- Sys.Date()
+  #df.SP500     <- GetSP500Stocks()
+  #stockNames   <- df.SP500$Tickers
+  stockList    <- c('JNJ', 'PG', 'JPM', 'FB', 'JNJ')
+  riskFreeRate  <- .0160
 
-first.date    <- Sys.Date() - 365 * 5
-last.date     <- Sys.Date()
-stockNames    <- c('JNJ', 'PG', 'JPM', 'FB', 'JNJ')
-riskFreeRate  <- .0160
+# PULL IN STOCK DATA --------------------------------------------------------------------------------------------
+    df <- BatchGetSymbols(tickers = stockList, 
+                          first.date = startDate,
+                          last.date = endDate, 
+                          freq.data = 'monthly',
+                          cache.folder = file.path(tempdir(), 'BGS_Cache'))
+    
+  # Mutate Data (Drop Cols and Rename)
+    df <- as.data.frame(df$df.tickers) %>%
+          select(ref.date,
+                 ticker,
+                 ret.adjusted.prices) %>%
+          mutate(ref.date = as.Date(ref.date)) %>%
+          rename(date = ref.date) %>%
+          rename(stockName = ticker) %>%
+          rename(stockReturn = ret.adjusted.prices) %>%
+          drop_na()
+    
+  # Create Avg. Return Table (by Stock)
+    df.return <- df %>% 
+                  group_by(stockName) %>%
+                  summarise(avgMonthlyReturn = mean(stockReturn)) %>%
+                  mutate(avgAnnualReturn = avgMonthlyReturn * 12)
 
-df <- BatchGetSymbols(tickers = stockNames, 
-                      first.date = first.date,
-                      last.date = last.date, 
-                      freq.data = 'monthly',
-                      cache.folder = file.path(tempdir(), 'BGS_Cache'))
-
-df <- as.data.frame(df$df.tickers) %>%
-      select(ref.date,
-             ticker,
-             ret.adjusted.prices) %>%
-      mutate(ref.date = as.Date(ref.date)) %>%
-      rename(date = ref.date) %>%
-      rename(stockName = ticker) %>%
-      rename(stockReturn = ret.adjusted.prices) %>%
-      drop_na()
-
-df.return <- df %>% 
-              group_by(stockName) %>%
-              summarise(avgMonthlyReturn = mean(stockReturn)) %>% # Creates table with average return per stock
-              mutate(avgAnnualReturn = avgMonthlyReturn * 12)
-
-df <- df %>%
-      mutate(stockReturn = stockReturn - riskFreeRate) %>%
-      rename(excessReturn = stockReturn)
-
-df <- pivot_wider(df, names_from = stockName, values_from = excessReturn)
-
-
-
+  
+  # Calculate Excess Returns
+    df <- df %>%
+          mutate(stockReturn = stockReturn - riskFreeRate) %>%
+          rename(excessReturn = stockReturn)
+    
+    df <- pivot_wider(df, 
+                      names_from = stockName, 
+                      values_from = excessReturn)
 
