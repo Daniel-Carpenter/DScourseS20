@@ -11,12 +11,12 @@
   library(xtable)  
 
 # INPUTS  -------------------------------------------------------------------------------------------------------
-    startDate    <- Sys.Date() - 365 * 20
-    endDate     <- Sys.Date() - 365 * 10
+    startDate    <- Sys.Date() - 365 / 6
+    endDate     <- Sys.Date()
     
     #df.SP500     <- GetSP500Stocks()
     #stockList   <- df.SP500$Tickers
-    stockList    <- c('JNJ', 'PG', 'JPM', 'MSFT', 'AAPL','MMM')
+    stockList    <- c('JNJ', 'PG','MSFT') # , 'JPM', 'MSFT', 'AAPL','MMM'
     riskFreeRate  <- .0160
     desiredReturn       <- 0.10   # 10% = 0.10
     dollarsInvested     <- 10000
@@ -31,6 +31,9 @@
                           last.date = endDate, 
                           freq.data = 'monthly',
                           cache.folder = file.path(tempdir(), 'BGS_Cache'))
+    
+    exampleData <- as.data.frame(df$df.tickers) %>%
+                    select(-ret.closing.prices, -volume)
   
   # Mutate Data (Drop Cols and Rename)
     df <- as.data.frame(df$df.tickers) %>%
@@ -61,7 +64,7 @@
                                    drop_na())
     
   # Calculate Excess Returns
-    df.excess <-  df.matrix[,1:NCOL(df.matrix)] - df.return[,1:NCOL(df.matrix)] # Stock Price - mean Stock Price
+    df.excess <-  df.matrix[,1:NCOL(df.matrix)] - df.return[,1:NCOL(df.return)] # Stock Price - mean Stock Price
 
   # Stock List to Data Frame
     stockList <- as.data.frame(stockList) #Needs to be other object on original pull  
@@ -131,6 +134,8 @@
       print(summaryTable)
       
 # VISUALIZATIONS --------------------------------------------------------------------------
+    # Example Data
+      xtable(exampleData)
     # Optimized Portfolio Stats
       xtable(summaryTable)
       xtable(portfolioOptimal)
