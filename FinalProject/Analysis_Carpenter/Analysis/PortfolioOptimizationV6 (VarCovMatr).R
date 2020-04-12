@@ -11,10 +11,11 @@
   library(rvest)      # Used to web scrape stock list
   library(tidyr)      # Used to pivot data frame
 
+
 # INPUTS  -------------------------------------------------------------------------------------------------------
   startDate           <- "1990-01-01"
   endDate             <- Sys.Date()
-  stockList <- c('MSFT', 'AAPL', 'AMZN') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
+  stockList <- c('MSFT', 'AAPL', 'AMZN','FB', 'JNJ', 'GOOG', 'PG', 'JPM') # , 'FB', 'JNJ', 'GOOG', 'GOOGL', 'PG', 'JPM'
   
   ##Used for Stock Webscape
     stockList.Url       <- "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies#References"
@@ -83,9 +84,8 @@
   # Create Variance-Covariance Matrix
     df.matrix <- data.matrix(df %>% # Converts df to Matrix
       select(-date))
-    
-    t.data.matrix <- t(df.matrix) # Transpose of df.matrix
-    VarCovMatrix <- (t.data.matrix %*% df.matrix) / length(df) # Creates Variance Covariance Matrix
+
+    VarCovMatrix <- (t(df.matrix) %*% df.matrix) / length(df) # Creates Variance Covariance Matrix
     
   # Create Weights Table
     
