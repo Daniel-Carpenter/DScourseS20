@@ -11,12 +11,12 @@
   library(xtable)  
 
 # INPUTS  -------------------------------------------------------------------------------------------------------
-    startDate    <- Sys.Date() - 365 / 6
+    startDate    <- Sys.Date() - 365 * 5
     endDate     <- Sys.Date()
     
     #df.SP500     <- GetSP500Stocks()
     #stockList   <- df.SP500$Tickers
-    stockList    <- c('JNJ', 'PG','MSFT') # , 'JPM', 'MSFT', 'AAPL','MMM'
+    stockList    <- c('JNJ', 'PG', 'JPM', 'MSFT', 'AAPL','MMM') # , 'JPM', 'MSFT', 'AAPL','MMM'
     riskFreeRate  <- .0160
     desiredReturn       <- 0.10   # 10% = 0.10
     dollarsInvested     <- 10000
@@ -25,29 +25,36 @@
   # Make Variables Monthly
     desiredReturn <- desiredReturn / 12
 
+    tBill <- c('^IRX')
+    
   # Pull Stock Data
-    df <- BatchGetSymbols(tickers = stockList, 
+    df <- BatchGetSymbols(tickers = c(tBill, stockList), 
                           first.date = startDate,
                           last.date = endDate, 
                           freq.data = 'monthly',
                           cache.folder = file.path(tempdir(), 'BGS_Cache'))
     
-    exampleData <- as.data.frame(df$df.tickers) %>%
-                    select(-ret.closing.prices, -volume)
-  
   # Mutate Data (Drop Cols and Rename)
     df <- as.data.frame(df$df.tickers) %>%
       select(ref.date,
              ticker,
+             price.adjusted,
              ret.adjusted.prices) %>%
       mutate(ref.date = as.Date(ref.date)) %>%
       rename(date = ref.date) %>%
+      rename(stockPrice = price.adjusted) %>%
       rename(stockName = ticker) %>%
       rename(stockReturn = ret.adjusted.prices) %>%
       drop_na()
     
+    exampleData <- df %>%
+      mutate(date = as.character(date))
+    
+    df <- df %>% select(-stockPrice)
+    
   # Create Avg. Return Table (by Stock)
-    df.return <- as.data.frame(df %>% 
+    df.return <- as.data.frame(df %>%
+      filter(stockName != '^IRX') %>%
       group_by(stockName) %>%
       summarise(avgMonthlyReturn = mean(stockReturn)))
       rownames(df.return) = df.return$stockName
@@ -64,9 +71,15 @@
                                    drop_na())
     
   # Calculate Excess Returns
-    df.excess <-  df.matrix[,1:NCOL(df.matrix)] - df.return[,1:NCOL(df.return)] # Stock Price - mean Stock Price
-
-  # Stock List to Data Frame
+    df.excess <-  df.matrix[,2:NCOL(df.matrix)] - df.matrix[,1] # Stock Price - mean Stock Price
+    
+    
+  # Clean up Some Tables for Below Calculatons
+    df <- df %>% select(-'^IRX')
+    df.matrix     <- data.matrix(df %>% 
+                                   select(-date) %>%
+                                   drop_na())
+    
     stockList <- as.data.frame(stockList) #Needs to be other object on original pull  
     stockList <- t(df.matrix)
     
@@ -79,7 +92,7 @@
   # Create Weights Table
       stockWeights <- c()
 
-      for (i in 1:NCOL(df.matrix))
+      for (i in 1:NCOL(df.excess))
       {
         stockWeights[i] <- 1
       }
@@ -88,13 +101,9 @@
         rownames(stockWeights)  <- rownames(stockList)
       
       stockWeights <- t(as.matrix(stockWeights))
-      stockWeights1 <- stockWeights
-      
+
   # Optimize Risk, Given desired Expected Return
-      objectiveFun      <- sqrt(diag(VarCovMatrix)) 
-      #tempVarCovMatVector <- sqrt(stockWeights1 %*% VarCovMatrix)
-      
-      #objectiveFun      <- tempVarCovMatVector
+      objectiveFun      <- stockWeights %*% sqrt(VarCovMatrix) 
       constraintInputs  <- rbind(stockWeights, as.vector(df.return))
       direction         <- c("==", "==")
       constraintValues  <- c(1, desiredReturn)
@@ -135,13 +144,17 @@
       
 # VISUALIZATIONS --------------------------------------------------------------------------
     # Example Data
-      xtable(exampleData)
+      #xtable(exampleData)
+      
+    # Variance-Covariance Matrix Example
+      #xtable(VarCovMatrix)
+      
     # Optimized Portfolio Stats
-      xtable(summaryTable)
-      xtable(portfolioOptimal)
+      #xtable(summaryTable)
+      #xtable(portfolioOptimal)
     
     # Monthly Returns by Stock  
-      ggplot(data = df.visual, aes(
+      ggplot(data = exampleData, aes(
         x = date, 
         y = stockReturn,
         color = stockName)) +
