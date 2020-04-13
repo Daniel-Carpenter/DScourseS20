@@ -11,12 +11,12 @@
   library(xtable)  
 
 # INPUTS  -------------------------------------------------------------------------------------------------------
-    startDate    <- Sys.Date() - 365 * 5
-    endDate     <- Sys.Date()
+    startDate     <- "2015-01-01"
+    endDate       <- "2020-03-31"
     
     #df.SP500     <- GetSP500Stocks()
-    #stockList   <- df.SP500$Tickers
-    stockList    <- c('JNJ', 'PG', 'JPM', 'MSFT', 'AAPL','MMM') # , 'JPM', 'MSFT', 'AAPL','MMM'
+    #stockList    <- df.SP500$Tickers
+    stockList     <- c('JNJ', 'PG', 'JPM') # , 'JPM', 'MSFT', 'AAPL','MMM'
     riskFreeRate  <- .0160
     desiredReturn       <- 0.10   # 10% = 0.10
     dollarsInvested     <- 10000
@@ -48,7 +48,8 @@
       drop_na()
     
     exampleData <- df %>%
-      mutate(date = as.character(date))
+      mutate(date = as.character(date)) %>%
+      filter(stockName != '^IRX')
     
     df <- df %>% select(-stockPrice)
     
@@ -73,7 +74,6 @@
   # Calculate Excess Returns
     df.excess <-  df.matrix[,2:NCOL(df.matrix)] - df.matrix[,1] # Stock Price - mean Stock Price
     
-    
   # Clean up Some Tables for Below Calculatons
     df <- df %>% select(-'^IRX')
     df.matrix     <- data.matrix(df %>% 
@@ -83,29 +83,17 @@
     stockList <- as.data.frame(stockList) #Needs to be other object on original pull  
     stockList <- t(df.matrix)
     
-  
-    
 # MAIN -----------------------------------------------------------------------------------------------------------
   # Create Variance-Covariance Matrix
       VarCovMatrix  <- (t(df.excess) %*% df.excess) / NROW(stockList) # Creates Variance Covariance Matrix
   
-  # Create Weights Table
-      stockWeights <- c()
-
-      for (i in 1:NCOL(df.excess))
-      {
-        stockWeights[i] <- 1
-      }
-      stockWeights              <- as.data.frame(stockWeights)
-        colnames(stockWeights)  <- c("portfolioWeight")
-        rownames(stockWeights)  <- rownames(stockList)
-      
-      stockWeights <- t(as.matrix(stockWeights))
-
   # Optimize Risk, Given desired Expected Return
-      objectiveFun      <- stockWeights %*% sqrt(VarCovMatrix) 
-      constraintInputs  <- rbind(stockWeights, as.vector(df.return))
-      direction         <- c("==", "==")
+      objectiveFun      <- rep(1,nrow(VarCovMatrix)) %*% sqrt(VarCovMatrix)
+      
+      stockWeights <- rep(1, nrow(VarCovMatrix))
+      
+      constraintInputs  <- rbind(rep(1, nrow(VarCovMatrix)), as.vector(df.return))
+      direction         <- c("==", ">=")
       constraintValues  <- c(1, desiredReturn)
       
       optimalWeights    <- Rglpk_solve_LP(objectiveFun,
@@ -113,7 +101,9 @@
                                           direction,
                                           constraintValues,
                                           max = FALSE)
-
+      
+      optimalWeights
+      
       portfolioOptimal <- cbind(as.data.frame(optimalWeights$solution),
                                 as.data.frame(optimalWeights$solution) * dollarsInvested)
         colnames(portfolioOptimal)  <- c("Stock Weight", "Dollar Investment")
