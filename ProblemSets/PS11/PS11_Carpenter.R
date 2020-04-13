@@ -11,14 +11,14 @@
   library(xtable)  
 
 # INPUTS  -------------------------------------------------------------------------------------------------------
-    startDate     <- "2015-01-01"
-    endDate       <- "2020-03-31"
+    startDate     <- Sys.Date() - 365 * 10
+    endDate       <- Sys.Date()
     
     #df.SP500     <- GetSP500Stocks()
     #stockList    <- df.SP500$Tickers
-    stockList     <- c('JNJ', 'PG', 'JPM') # , 'JPM', 'MSFT', 'AAPL','MMM'
+    stockList     <- c('JNJ', 'PG', 'JPM')
     riskFreeRate  <- .0160
-    desiredReturn       <- 0.10   # 10% = 0.10
+    desiredReturn       <- 0.15   # 10% = 0.10
     dollarsInvested     <- 10000
   
 # DATA PULL -----------------------------------------------------------------------------------------------------
@@ -89,9 +89,6 @@
   
   # Optimize Risk, Given desired Expected Return
       objectiveFun      <- rep(1,nrow(VarCovMatrix)) %*% sqrt(VarCovMatrix)
-      
-      stockWeights <- rep(1, nrow(VarCovMatrix))
-      
       constraintInputs  <- rbind(rep(1, nrow(VarCovMatrix)), as.vector(df.return))
       direction         <- c("==", ">=")
       constraintValues  <- c(1, desiredReturn)
@@ -101,9 +98,7 @@
                                           direction,
                                           constraintValues,
                                           max = FALSE)
-      
-      optimalWeights
-      
+    
       portfolioOptimal <- cbind(as.data.frame(optimalWeights$solution),
                                 as.data.frame(optimalWeights$solution) * dollarsInvested)
         colnames(portfolioOptimal)  <- c("Stock Weight", "Dollar Investment")
@@ -134,14 +129,14 @@
       
 # VISUALIZATIONS --------------------------------------------------------------------------
     # Example Data
-      #xtable(exampleData)
+      xtable(exampleData)
       
     # Variance-Covariance Matrix Example
-      #xtable(VarCovMatrix)
+      xtable(VarCovMatrix)
       
     # Optimized Portfolio Stats
-      #xtable(summaryTable)
-      #xtable(portfolioOptimal)
+      xtable(summaryTable)
+      xtable(portfolioOptimal)
     
     # Monthly Returns by Stock  
       ggplot(data = exampleData, aes(
