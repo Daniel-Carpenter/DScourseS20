@@ -1,0 +1,223 @@
+\documentclass[handout,t]{beamer}
+\usepackage[portuges]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[alf]{abntex2cite}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{pgfpages}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{ifthen}
+\usepackage{capt-of}
+\usepackage[authoryear]{natbib}
+\usetheme{Berlin}
+%\usecolortheme{ufrn}
+\setbeamertemplate{caption}[numbered]
+
+% COLORS ===================================================================================================
+\usepackage{color}
+%R G B
+\DefineNamedColor{named}{azul2}{RGB}{40,96,127}
+\DefineNamedColor{named}{azul1}{RGB}{4,151,229}
+\DefineNamedColor{named}{azul3}{RGB}{1,41,64}
+\DefineNamedColor{named}{laranja1}{RGB}{255,146,5}
+
+\mode<presentation>
+\setbeamercolor{author in head/foot}{bg=azul1, fg=white}
+\setbeamercolor{title in head/foot}{bg=azul2, fg=white}
+%\setbeamercolor{institute in head/foot}{fg=instituteColor}
+\setbeamercolor{date in head/foot}{bg=azul3, fg=white}
+
+\setbeamercolor{alerted text}{fg=azul1!80!laranja1}
+\setbeamercolor*{palette primary}{fg=white,bg=azul2}
+\setbeamercolor*{palette secondary}{fg=laranja1,bg=white}
+\setbeamercolor*{palette tertiary}{fg=white,bg=azul3}
+\setbeamercolor*{palette quaternary}{fg=white,bg=laranja1}
+\setbeamercolor*{structure}{fg=azul3,bg=white}
+\setbeamercolor{frametitle}{fg=white,bg=azul3}
+\mode<all>
+
+\defbeamertemplate*{footline}{themeName}
+{
+	\leavevmode
+	\hbox{
+		\begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}
+			\usebeamerfont{author in head/foot}\insertauthor{}
+		\end{beamercolorbox}
+		
+		\begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}
+			\usebeamerfont{title in head/foot}\text{Portfolio Optimization Program}
+		\end{beamercolorbox}
+		
+		\begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}
+			\usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}\insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+		\end{beamercolorbox}}
+	\vskip0pt
+}
+
+% TITLE PAGE ===============================================================================================
+    \title[Title]{Stock Portfolio Optimization and Automation Program}
+    \date{April 2020}
+    \author[Author]{Daniel Carpenter}
+    \institute[University]{University of Oklahoma}
+    
+    \vfill
+    \pagebreak{}
+    \begin{spacing}{1.0}
+    \bibliographystyle{jpe}
+    \bibliography{References.bib}
+    \addcontentsline{toc}{section}{References}
+    \end{spacing}
+    \vfill
+
+% SLIDES BODY ==============================================================================================
+    \begin{document}
+    % Outline
+        \frame{\titlepage}
+        \section[]{}
+        \begin{frame}{Outline of Slides}
+        	\tableofcontents
+        \end{frame}
+    
+    % Introduction -----------------------------------------------------------------------------------------
+    \section{Introduction}
+        \begin{frame}{Introduction}
+        	\begin{doublespacing}
+            	\begin{enumerate}
+            	    \item Basics of a stock portfolio 
+            	    \item What it means to optimize a portfolio 
+            	    \item Modern Portfolio Theory and Capital Market Line \citet{Simon2008}
+            	    \item Spoiler alert: this method isn't mainstream anymore, but it can be very useful
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+    
+    % Data  ------------------------------------------------------------------------------------------------
+    \section{Data}
+        \begin{frame}{Using Yahoo Finance's API}
+        	\begin{doublespacing}
+            	\begin{enumerate}
+            	    \item Stock Data from Yahoo Finance's API
+            	    \item Package allows infinite number of stock inputs
+            	    \item Package easily integrates S&P 500, allowing for broad sample
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+        
+        \begin{frame}[allowframebreaks]{Manipulating the Dataset}
+            \begin{doublespacing}
+            	\begin{enumerate}
+            	    \item Data cleaning mainly includes formatting issues
+            	    \item Added columns for excess return calculation
+            	    \item Table 1: Example of the API Export 
+                            \begin{center}
+                                % latex table generated in R 3.6.0 by xtable 1.8-4 package
+                                % Mon Apr 13 09:21:39 2020
+                                \begin{table}[ht]
+                                \centering
+                                \begin{tabular}{rllrr}
+                                  \hline
+                                 & date & stockName & stockPrice & stockReturn \\ 
+                                  \hline
+
+                                  1 & 2020-02-03 & MSFT & 173.90 & 0.07 \\ 
+                                  2 & 2020-03-02 & MSFT & 172.79 & -0.01 \\ 
+                                  3 & 2020-04-01 & MSFT & 152.11 & -0.12 \\ 
+                                   \hline
+                                \end{tabular}
+                                \end{table}
+                            \end{center}
+                    \framebreak
+                    \item Drops null values for firms who were not publicly traded during date range
+                    \item Pivots data so that excess return on stocks are column variables 
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+     
+    % Methods ----------------------------------------------------------------------------------------------
+    \section{Methods}
+        \begin{frame}[allowframebreaks]{Methods}
+        	\begin{doublespacing}
+            	\begin{enumerate}
+            	    \item Calculating Excess Returns
+            	        \begin{equation} \label{Excess Returns}
+                            Returns_{Excess} = Return_{Stock_{i}} - RiskFreeRate
+                        \end{equation}
+            	    \item Shows abnormal returns beyond United States Treasury-Bill 
+            	    \item Why the T-Bill? T-Bill's are assumed "riskless" assets because they experience low fluctuations in value and are highly liquid
+            	    
+            	    \framebreak
+            	    \item Finding Variance and Covariance between Stocks allows for better optimization
+                         \begin{equation} \label{Variance-Covariance-Matrix}
+                                Variance-Covariance-Matrix = 
+                                \frac{X^{T}_{Excess Returns} * X_{Excess Returns}}
+                                {Number Of Stocks_{X_{Excess Returns}}} 
+                        \end{equation}
+            	    
+            	    \framebreak
+            	    \item Linear Optimization with rGLPK package
+            	    \item Program outputs optimal weights in each stock
+                        % latex table generated in R 3.6.0 by xtable 1.8-4 package
+                        % Mon Apr 13 13:15:17 2020
+                        \begin{table}[ht]
+                        \centering
+                        \begin{tabular}{rlrr}
+                          \hline
+                         & Stock Name & Stock Weight & Dollar Investment \\ 
+                          \hline
+                        1 & JPM & 1.00 & 10000.00 \\ 
+                           \hline
+                        \end{tabular}
+                        \end{table}
+                    	    
+            	    \framebreak
+            	    \item Program outputs standard deviation (risk), expected return, and Sharpe Ratio of the optimized Portfolio
+                         % latex table generated in R 3.6.0 by xtable 1.8-4 package
+                        % Mon Apr 13 14:47:01 2020
+                        \begin{table}[ht]
+                        \centering
+                        \begin{tabular}{rr}
+                          \hline
+                         & Value \\ 
+                          \hline
+                        Risk & 15.97 \\ 
+                          Expected Return & 0.13 \\ 
+                          Sharpe Ratio & 0.01 \\ 
+                           \hline
+                        \end{tabular}
+                        \end{table}
+            	    
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+        
+    % Findings ---------------------------------------------------------------------------------------------
+    \section{Findings}
+        \begin{frame}{Findings}
+        	\begin{doublespacing}
+            	\begin{enumerate}
+            	    \item Many alternatives to passive investments
+            	    \item Not ideal to use this tool for active investments. 
+            	    \item According to the Wall Street Journal \citet{Malkie2017} , you will be beat 90 percent of time by a passive fund.
+            	    \item Wall Street's computer algorithms trade in fractions of a second, leaving the individual investor in the dust \citet{Patter2020}
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+        
+    % Importance of Topic ----------------------------------------------------------------------------------
+    \section{Importance of Topic}
+        \begin{frame}{Importance of Topic}
+        	\begin{doublespacing}
+            	\begin{enumerate}
+                    \item This tool can be used for investment decision making
+                    \item Easily bridges uncertain investors to information, which can be powerful
+            	\end{enumerate}
+            \end{doublespacing}
+        \end{frame}
+    
+    
+\end{document}
