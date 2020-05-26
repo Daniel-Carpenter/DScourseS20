@@ -1,0 +1,3 @@
+Link to Advanced R Online Repo - From University of Oklahoma's Masters in Data Science and Analytics Program:
+
+http://adv-r.had.co.nz/
